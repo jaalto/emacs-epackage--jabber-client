@@ -1,14 +1,5 @@
 (dolist (file
 	 '("fsm.el"
-	   "srv.el"
-	   "jabber-util.el"
-	   "jabber-widget.el"
-	   "jabber-keymap.el"
-
-	   "jabber.el"
-	   "jabber-core.el"
-	   "jabber-iq.el"
-
 	   "jabber-activity.el"
 	   "jabber-ahc-presence.el"
 	   "jabber-ahc.el"
@@ -24,6 +15,7 @@
 	   "jabber-compose.el"
 	   "jabber-conn.el"
 	   "jabber-console.el"
+	   "jabber-core.el"
 	   "jabber-disco.el"
 	   "jabber-events.el"
 	   "jabber-export.el"
@@ -34,7 +26,9 @@
 	   "jabber-ft-server.el"
 	   "jabber-gmail.el"
 	   "jabber-history.el"
+	   "jabber-iq.el"
 	   "jabber-keepalive.el"
+	   "jabber-keymap.el"
 	   "jabber-libnotify.el"
 	   "jabber-logon.el"
 	   "jabber-menu.el"
@@ -62,13 +56,17 @@
 	   "jabber-socks5.el"
 	   "jabber-time.el"
 	   "jabber-truncate.el"
+	   "jabber-util.el"
 	   "jabber-vcard-avatars.el"
 	   "jabber-vcard.el"
 	   "jabber-version.el"
 	   "jabber-watch.el"
+	   "jabber-widget.el"
 	   "jabber-wmii.el"
 	   "jabber-xmessage.el"
-	   "jabber-xml.el"))
+	   "jabber-xml.el"
+	   "jabber.el"
+	   "srv.el"))
   (let ((path (locate-library file)))
     (if (and (boundp 'verbose)
 	     verbose)
