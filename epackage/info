@@ -1,0 +1,38 @@
+Package: emacs-jabber
+Section: extensions
+License: GPL-2+
+Depends: emacs (>= 23)
+Status: stable unsafe
+Compat:
+Maintainer:
+Bugs:
+Upstream: Evgenii Terechkov <evg@altlinux.org>
+Upstream-Bugs: http://sourceforge.net/tracker/?group_id=88346&atid=586350
+Vcs-Type:
+Vcs-Url:
+Vcs-Args:
+Vcs-Browser:
+Vcs-User:
+Vcs-Password:
+Homepage: http://emacs-jabber.sourceforge.net
+Wiki: http://www.emacswiki.org/emacs/JabberEl
+Commentary:
+Description: client for Jabber XMPP protocol
+ .
+ A Jabber identifier (JID) is of the form username@server, just like an
+ e-mail address, and every Jabber user whose server is open to Internet
+ connections can communicate with any other user. Note that the Google Talk
+ service is an XMPP service, so if you have a GMail account, you already
+ have a JID ending with @gmail.com. Connections ports needed are 5222 and
+ 5223 for ssl.
+ .
+ To use, configure jabber-username, jabber-server, jabber-network-server,
+ jabber-connection-type and call M-x jabber-connect (C-u C-x C-j C-c). To
+ disconnect, type M-x jabber-disconnect (C-x C-j C-d). See all commands
+ with C-x C-j C-h.
+ .
+ For encrypted connections, like Google Tak, GnuTLS or OpenSSL is
+ required.
+ .
+ NOTE: Marked unsafe because defines unconditionally keys to global
+ keymap; keys cannot be relocated to another prefix than C-x.
