@@ -10,4 +10,9 @@
          (:network-server . "talk.google.com")
          (:port 5223))))
 
+(setq jabber-keepalive-interval
+
+;; Do not expire passwords
+(setq password-cache-expiry nil)
+
 ;; End of file
