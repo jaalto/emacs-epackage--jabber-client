@@ -6,7 +6,8 @@ Status: stable unsafe
 Compat:
 Maintainer:
 Bugs:
-Upstream: Evgenii Terechkov <evg@altlinux.org>
+Upstream: Magnus Henoch (Author) <magnus.henoch@gmail.com>,
+ Evgenii Terechkov (Co-developer) <evg@altlinux.org>
 Upstream-Bugs: http://sourceforge.net/tracker/?group_id=88346&atid=586350
 Vcs-Type:
 Vcs-Url:
