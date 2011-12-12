@@ -27,9 +27,9 @@ Description: client for Jabber XMPP protocol
  5223 for ssl.
  .
  To use, configure jabber-username, jabber-server, jabber-network-server,
- jabber-connection-type and call M-x jabber-connect (C-u C-x C-j C-c). To
- disconnect, type M-x jabber-disconnect (C-x C-j C-d). See all commands
- with C-x C-j C-h.
+ jabber-connection-type, password-cache-expiry and call M-x jabber-connect
+ (C-u C-x C-j C-c). To disconnect, type M-x jabber-disconnect (C-x C-j
+ C-d). See all commands with C-x C-j C-h.
  .
  For encrypted connections, like Google Tak, GnuTLS or OpenSSL is
  required.
