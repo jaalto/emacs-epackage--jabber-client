@@ -19,7 +19,6 @@ Homepage: http://emacs-jabber.sourceforge.net
 Wiki: http://www.emacswiki.org/emacs/JabberEl
 Commentary:
 Description: client for Jabber XMPP protocol
- .
  A Jabber identifier (JID) is of the form username@server, just like an
  e-mail address, and every Jabber user whose server is open to Internet
  connections can communicate with any other user. Note that the Google Talk
