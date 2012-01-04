@@ -1,304 +1,486 @@
 
-;;;### (autoloads (sha1) "sha1" "../compat/sha1.el" (20196 45135))
-;;; Generated autoloads from ../compat/sha1.el
+;;;### (autoloads (jabber-info jabber-customize jabber-debug-keep-process-buffers
+;;;;;;  jabber-debug-log-xml jabber-default-priority jabber-default-status
+;;;;;;  jabber-default-show jabber-account-list) "../jabber" "../jabber.el"
+;;;;;;  (20197 46469))
+;;; Generated autoloads from jabber.el
 
-(autoload 'sha1 "sha1" "\
-Return the SHA1 (Secure Hash Algorithm) of an object.
-OBJECT is either a string or a buffer.
-Optional arguments BEG and END denote buffer positions for computing the
-hash of a portion of OBJECT.
-If BINARY is non-nil, return a string in binary form.
+(defvar jabber-account-list nil "\
+List of Jabber accounts.
+Each element of the list is a cons cell describing a Jabber account,
+where the car is a JID and the CDR is an alist.
 
-\(fn OBJECT &optional BEG END BINARY)" nil nil)
+JID is a full Jabber ID string (e.g. foo@bar.tld). You can also
+specify the resource (e.g. foo@bar.tld/emacs).
+The following keys can be present in the alist:
+:password is a string to authenticate ourself against the server.
+It can be empty.
+:network-server is a string identifying the address to connect to,
+if it's different from the server part of the JID.
+:port is the port to use (default depends on connection type).
+:connection-type is a symbol. Valid symbols are `starttls',
+`network' and `ssl'.
+
+Only JID is mandatory.  The rest can be guessed at run-time.
+
+Examples:
+
+Two accounts without any special configuration:
+\((\"foo@example.com\") (\"bar@example.net\"))
+
+One disabled account with a non-standard port:
+\((\"romeo@montague.net\" (:port . 5242) (:disabled . t)))
+
+If you don't have SRV and STARTTLS capabilities in your Emacs,
+configure a Google Talk account like this:
+\((\"username@gmail.com\"
+  (:network-server . \"talk.google.com\")
+  (:connection-type . ssl)))")
+
+(custom-autoload 'jabber-account-list "../jabber" t)
+
+(defvar jabber-default-show "" "\
+default show state")
+
+(custom-autoload 'jabber-default-show "../jabber" t)
+
+(defvar jabber-default-status "" "\
+default status string")
+
+(custom-autoload 'jabber-default-status "../jabber" t)
+
+(defvar jabber-default-priority 10 "\
+default priority")
+
+(custom-autoload 'jabber-default-priority "../jabber" t)
+
+(defvar *jabber-current-status* nil "\
+the users current presence status")
+
+(defvar *jabber-current-show* nil "\
+the users current presence show")
+
+(defvar *jabber-current-priority* nil "\
+the user's current priority")
+
+(defvar jabber-debug-log-xml nil "\
+Set to non-nil to log all XML i/o in *-jabber-console-JID-* buffer. Set to string to also dump XML i/o in specified file.")
+
+(custom-autoload 'jabber-debug-log-xml "../jabber" t)
+
+(defvar jabber-debug-keep-process-buffers nil "\
+If nil, kill process buffers when the process dies.
+Contents of process buffers might be useful for debugging.")
+
+(custom-autoload 'jabber-debug-keep-process-buffers "../jabber" t)
+
+(defconst jabber-presence-faces '(("" . jabber-roster-user-online) ("away" . jabber-roster-user-away) ("xa" . jabber-roster-user-xa) ("dnd" . jabber-roster-user-dnd) ("chat" . jabber-roster-user-chatty) ("error" . jabber-roster-user-error) (nil . jabber-roster-user-offline)) "\
+Mapping from presence types to faces")
+
+(autoload 'jabber-customize "jabber" "\
+customize jabber options
+
+\(fn)" t nil)
+
+(autoload 'jabber-info "jabber" "\
+open jabber.el manual
+
+\(fn)" t nil)
 
 ;;;***
 
-;;;### (autoloads (hexrgb-float-to-color-value hexrgb-color-value-to-float
-;;;;;;  hexrgb-approx-equal hexrgb-int-to-hex hexrgb-hex-char-to-integer
-;;;;;;  hexrgb-hex-to-int hexrgb-increment-hex hexrgb-increment-equal-rgb
-;;;;;;  hexrgb-increment-blue hexrgb-increment-green hexrgb-increment-red
-;;;;;;  hexrgb-hex-to-color-values hexrgb-color-values-to-hex hexrgb-color-name-to-hex
-;;;;;;  hexrgb-hex-to-rgb hexrgb-hex-to-hsv hexrgb-rgb-to-hex hexrgb-hsv-to-hex
-;;;;;;  hexrgb-hsv-to-rgb hexrgb-rgb-to-hsv hexrgb-blue hexrgb-green
-;;;;;;  hexrgb-red hexrgb-value hexrgb-saturation hexrgb-hue hexrgb-complement
-;;;;;;  hexrgb-rgb-hex-string-p hexrgb-read-color hexrgb-canonicalize-defined-colors-flag)
-;;;;;;  "hexrgb" "../compat/hexrgb.el" (20196 45135))
-;;; Generated autoloads from ../compat/hexrgb.el
-
-(eval-and-compile (defun hexrgb-canonicalize-defined-colors (list) "Copy of LIST with color names canonicalized.\nLIST is a list of color names (strings).\nCanonical names are lowercase, with no whitespace.\nThere are no duplicate names." (let ((tail list) this new) (while tail (setq this (car tail) this (hexrgb-delete-whitespace-from-string (downcase this) 0 (length this))) (unless (member this new) (push this new)) (pop tail)) (nreverse new))) (defun hexrgb-delete-whitespace-from-string (string &optional from to) "Remove whitespace from substring of STRING from FROM to TO.\nIf FROM is nil, then start at the beginning of STRING (FROM = 0).\nIf TO is nil, then end at the end of STRING (TO = length of STRING).\nFROM and TO are zero-based indexes into STRING.\nCharacter FROM is affected (possibly deleted).  Character TO is not." (setq from (or from 0) to (or to (length string))) (with-temp-buffer (insert string) (goto-char (+ from (point-min))) (let ((count from) char) (while (and (not (eobp)) (< count to)) (setq char (char-after)) (if (memq char '(32 9 10)) (delete-char 1) (forward-char 1)) (setq count (1+ count))) (buffer-string)))))
-
-(defconst hexrgb-defined-colors (eval-when-compile (and window-system (x-defined-colors))) "\
-List of all supported colors.")
-
-(defconst hexrgb-defined-colors-no-dups (eval-when-compile (and window-system (hexrgb-canonicalize-defined-colors (x-defined-colors)))) "\
-List of all supported color names, with no duplicates.
-Names are all lowercase, without any spaces.")
-
-(defconst hexrgb-defined-colors-alist (eval-when-compile (and window-system (mapcar #'list (x-defined-colors)))) "\
-Alist of all supported color names, for use in completion.
-See also `hexrgb-defined-colors-no-dups-alist', which is the same
-thing, but without any duplicates, such as \"light blue\" and
-\"LightBlue\".")
-
-(defconst hexrgb-defined-colors-no-dups-alist (eval-when-compile (and window-system (mapcar #'list (hexrgb-canonicalize-defined-colors (x-defined-colors))))) "\
-Alist of all supported color names, with no duplicates, for completion.
-Names are all lowercase, without any spaces.")
-
-(defvar hexrgb-canonicalize-defined-colors-flag t "\
-*Non-nil means remove duplicate color names.
-Names are considered duplicates if they are the same when abstracting
-from whitespace and letter case.")
-
-(custom-autoload 'hexrgb-canonicalize-defined-colors-flag "hexrgb" t)
-
-(autoload 'hexrgb-read-color "hexrgb" "\
-Read a color name or RGB hex value: #RRRRGGGGBBBB.
-Completion is available for color names, but not for RGB hex strings.
-If you input an RGB hex string, it must have the form #XXXXXXXXXXXX or
-XXXXXXXXXXXX, where each X is a hex digit.  The number of Xs must be a
-multiple of 3, with the same number of Xs for each of red, green, and
-blue.  The order is red, green, blue.
-
-Color names that are normally considered equivalent are canonicalized:
-They are lowercased, whitespace is removed, and duplicates are
-eliminated.  E.g. \"LightBlue\" and \"light blue\" are both replaced
-by \"lightblue\".  If you do not want this behavior, but want to
-choose names that might contain whitespace or uppercase letters, then
-customize option `hexrgb-canonicalize-defined-colors-flag' to nil.
-
-In addition to standard color names and RGB hex values, the following
-are available as color candidates.  In each case, the corresponding
-color is used.
-
-* `*copied foreground*'  - last copied foreground, if available
-* `*copied background*'  - last copied background, if available
-* `*mouse-2 foreground*' - foreground where you click `mouse-2'
-* `*mouse-2 background*' - background where you click `mouse-2'
-* `*point foreground*'   - foreground under the cursor
-* `*point background*'   - background under the cursor
-
-\(You can copy a color using eyedropper commands such as
-`eyedrop-pick-foreground-at-mouse'.)
-
-Checks input to be sure it represents a valid color.  If not, raises
-an error (but see exception for empty input with non-nil
-ALLOW-EMPTY-NAME-P).
-
-Interactively, or with optional arg CONVERT-TO-RGB-P non-nil, converts
-an input color name to an RGB hex string.  Returns the RGB hex string.
-
-Optional arg ALLOW-EMPTY-NAME-P controls what happens if you enter an
-empty color name (that is, you just hit `RET').  If non-nil, then
-`hexrgb-read-color' returns an empty color name, \"\".  If nil, then
-it raises an error.  Programs must test for \"\" if ALLOW-EMPTY-NAME-P
-is non-nil.  They can then perform an appropriate action in case of
-empty input.
-
-Optional arg PROMPT is the prompt.  Nil means use a default prompt.
-
-\(fn &optional CONVERT-TO-RGB-P ALLOW-EMPTY-NAME-P PROMPT)" t nil)
-
-(autoload 'hexrgb-rgb-hex-string-p "hexrgb" "\
-Non-nil if COLOR is an RGB string #XXXXXXXXXXXX.
-Each X is a hex digit.  The number of Xs must be a multiple of 3, with
-the same number of Xs for each of red, green, and blue.
-
-Non-nil optional arg LAXP means that the initial `#' is optional.  In
-that case, for a valid string of hex digits: when # is present 0 is
-returned; otherwise, t is returned.
-
-\(fn COLOR &optional LAXP)" nil nil)
-
-(autoload 'hexrgb-complement "hexrgb" "\
-Return the color that is the complement of COLOR.
-
-\(fn COLOR)" t nil)
-
-(autoload 'hexrgb-hue "hexrgb" "\
-Return the hue component of COLOR, in range 0 to 1 inclusive.
-COLOR is a color name or hex RGB string that starts with \"#\".
-
-\(fn COLOR)" t nil)
-
-(autoload 'hexrgb-saturation "hexrgb" "\
-Return the saturation component of COLOR, in range 0 to 1 inclusive.
-COLOR is a color name or hex RGB string that starts with \"#\".
-
-\(fn COLOR)" t nil)
-
-(autoload 'hexrgb-value "hexrgb" "\
-Return the value component of COLOR, in range 0 to 1 inclusive.
-COLOR is a color name or hex RGB string that starts with \"#\".
-
-\(fn COLOR)" t nil)
-
-(autoload 'hexrgb-red "hexrgb" "\
-Return the red component of COLOR, in range 0 to 1 inclusive.
-COLOR is a color name or hex RGB string that starts with \"#\".
-
-\(fn COLOR)" t nil)
-
-(autoload 'hexrgb-green "hexrgb" "\
-Return the green component of COLOR, in range 0 to 1 inclusive.
-COLOR is a color name or hex RGB string that starts with \"#\".
-
-\(fn COLOR)" t nil)
-
-(autoload 'hexrgb-blue "hexrgb" "\
-Return the blue component of COLOR, in range 0 to 1 inclusive.
-COLOR is a color name or hex RGB string that starts with \"#\".
-
-\(fn COLOR)" t nil)
-
-(autoload 'hexrgb-rgb-to-hsv "hexrgb" "\
-Convert RED, GREEN, BLUE components to HSV (hue, saturation, value).
-Each input component is 0.0 to 1.0, inclusive.
-Returns a list of HSV components of value 0.0 to 1.0, inclusive.
-
-\(fn RED GREEN BLUE)" nil nil)
-
-(autoload 'hexrgb-hsv-to-rgb "hexrgb" "\
-Convert HUE, SATURATION, VALUE components to RGB (red, green, blue).
-Each input component is 0.0 to 1.0, inclusive.
-Returns a list of RGB components of value 0.0 to 1.0, inclusive.
-
-\(fn HUE SATURATION VALUE)" nil nil)
-
-(autoload 'hexrgb-hsv-to-hex "hexrgb" "\
-Return the hex RBG color string for inputs HUE, SATURATION, VALUE.
-The inputs are each in the range 0 to 1.
-The output string is of the form \"#RRRRGGGGBBBB\".
-
-\(fn HUE SATURATION VALUE)" nil nil)
-
-(autoload 'hexrgb-rgb-to-hex "hexrgb" "\
-Return the hex RBG color string for inputs RED, GREEN, BLUE.
-The inputs are each in the range 0 to 1.
-The output string is of the form \"#RRRRGGGGBBBB\".
-
-\(fn RED GREEN BLUE)" nil nil)
-
-(autoload 'hexrgb-hex-to-hsv "hexrgb" "\
-Return a list of HSV (hue, saturation, value) color components.
-Each component is a value from 0.0 to 1.0, inclusive.
-COLOR is a color name or a hex RGB string that starts with \"#\" and
-is followed by an equal number of hex digits for red, green, and blue
-components.
-
-\(fn COLOR)" nil nil)
-
-(autoload 'hexrgb-hex-to-rgb "hexrgb" "\
-Return a list of RGB (red, green, blue) color components.
-Each component is a value from 0.0 to 1.0, inclusive.
-COLOR is a color name or a hex RGB string that starts with \"#\" and
-is followed by an equal number of hex digits for red, green, and blue
-components.
-
-\(fn COLOR)" nil nil)
-
-(autoload 'hexrgb-color-name-to-hex "hexrgb" "\
-Return the RGB hex string for the COLOR name, starting with \"#\".
-If COLOR is already a string starting with \"#\", then just return it.
-
-\(fn COLOR)" nil nil)
-
-(autoload 'hexrgb-color-values-to-hex "hexrgb" "\
-Convert list of rgb color VALUES to a hex string, #XXXXXXXXXXXX.
-Each X in the string is a hexadecimal digit.
-Input VALUES is as for the output of `x-color-values'.
-
-\(fn VALUES)" nil nil)
-
-(autoload 'hexrgb-hex-to-color-values "hexrgb" "\
-Convert hex COLOR to a list of rgb color values.
-COLOR is a hex rgb color string, #XXXXXXXXXXXX
-Each X in the string is a hexadecimal digit.  There are 3N X's, N > 0.
-The output list is as for `x-color-values'.
-
-\(fn COLOR)" nil nil)
-
-(autoload 'hexrgb-increment-red "hexrgb" "\
-Increment red value of rgb string HEX by INCREMENT.
-String HEX starts with \"#\".  Each color is NB-DIGITS hex digits long.
-If optional arg WRAP-P is non-nil, then the result wraps around zero.
-For example, incrementing \"#FFFFFFFFF\" by 1 will cause it to wrap
-around to \"#000000000\".
-
-\(fn HEX NB-DIGITS INCREMENT &optional WRAP-P)" nil nil)
-
-(autoload 'hexrgb-increment-green "hexrgb" "\
-Increment green value of rgb string HEX by INCREMENT.
-String HEX starts with \"#\".  Each color is NB-DIGITS hex digits long.
-For example, incrementing \"#FFFFFFFFF\" by 1 will cause it to wrap
-around to \"#000000000\".
-
-\(fn HEX NB-DIGITS INCREMENT &optional WRAP-P)" nil nil)
-
-(autoload 'hexrgb-increment-blue "hexrgb" "\
-Increment blue value of rgb string HEX by INCREMENT.
-String HEX starts with \"#\".  Each color is NB-DIGITS hex digits long.
-For example, incrementing \"#FFFFFFFFF\" by 1 will cause it to wrap
-around to \"#000000000\".
-
-\(fn HEX NB-DIGITS INCREMENT &optional WRAP-P)" nil nil)
-
-(autoload 'hexrgb-increment-equal-rgb "hexrgb" "\
-Increment each color value (r,g,b) of rgb string HEX by INCREMENT.
-String HEX starts with \"#\".  Each color is NB-DIGITS hex digits long.
-For example, incrementing \"#FFFFFFFFF\" by 1 will cause it to wrap
-around to \"#000000000\".
-
-\(fn HEX NB-DIGITS INCREMENT &optional WRAP-P)" nil nil)
-
-(autoload 'hexrgb-increment-hex "hexrgb" "\
-Increment HEX number (a string NB-DIGITS long) by INCREMENT.
-For example, incrementing \"FFFFFFFFF\" by 1 will cause it to wrap
-around to \"000000000\".
-
-\(fn HEX INCREMENT NB-DIGITS &optional WRAP-P)" nil nil)
-
-(autoload 'hexrgb-hex-to-int "hexrgb" "\
-Convert HEX string argument to an integer.
-The characters of HEX must be hex characters.
-
-\(fn HEX)" nil nil)
-
-(autoload 'hexrgb-hex-char-to-integer "hexrgb" "\
-Take a CHARACTER and return its value as if it were a hex digit.
-
-\(fn CHARACTER)" nil nil)
-
-(autoload 'hexrgb-int-to-hex "hexrgb" "\
-Convert integer argument INT to a #XXXXXXXXXXXX format hex string.
-Each X in the output string is a hexadecimal digit.
-NB-DIGITS is the number of hex digits.  If INT is too large to be
-represented with NB-DIGITS, then the result is truncated from the
-left.  So, for example, INT=256 and NB-DIGITS=2 returns \"00\", since
-the hex equivalent of 256 decimal is 100, which is more than 2 digits.
-
-\(fn INT &optional NB-DIGITS)" nil nil)
-
-(autoload 'hexrgb-approx-equal "hexrgb" "\
-Return non-nil if numbers X and Y are approximately equal.
-RFUZZ is a relative fuzz factor.  AFUZZ is an absolute fuzz factor.
-RFUZZ defaults to 1.0e-8.  AFUZZ defaults to (/ RFUZZ 10).
-RFUZZ and AFUZZ are converted to their absolute values.
-The algorithm is:
- (< (abs (- X Y)) (+ AFUZZ (* RFUZZ (+ (abs X) (abs Y))))).
-
-\(fn X Y &optional RFUZZ AFUZZ)" nil nil)
-
-(autoload 'hexrgb-color-value-to-float "hexrgb" "\
-Return the floating-point equivalent of color value N.
-N must be an integer between 0 and 65535, or else an error is raised.
-
-\(fn N)" nil nil)
-
-(autoload 'hexrgb-float-to-color-value "hexrgb" "\
-Return the color value equivalent of floating-point number X.
-X must be between 0.0 and 1.0, or else an error is raised.
-
-\(fn X)" nil nil)
+;;;### (autoloads (jabber-roster-update jabber-switch-to-roster-buffer)
+;;;;;;  "../jabber-roster" "../jabber-roster.el" (20197 46469))
+;;; Generated autoloads from jabber-roster.el
+
+(autoload 'jabber-switch-to-roster-buffer "jabber-roster" "\
+Switch to roster buffer.
+Optional JC argument is ignored; it's there so this function can
+be used in `jabber-post-connection-hooks'.
+
+\(fn &optional JC)" t nil)
+
+(autoload 'jabber-roster-update "jabber-roster" "\
+Update roster, in memory and on display.
+Add NEW-ITEMS, update CHANGED-ITEMS and remove DELETED-ITEMS, all
+three being lists of JID symbols.
+
+\(fn JC NEW-ITEMS CHANGED-ITEMS DELETED-ITEMS)" nil nil)
 
 ;;;***
-(provide 'emacs-jabber-epkg-0loaddefs)
+
+;;;### (autoloads (jabber-private-set jabber-private-get) "jabber-private"
+;;;;;;  "../jabber-private.el" (20197 46469))
+;;; Generated autoloads from jabber-private.el
+
+(autoload 'jabber-private-get "jabber-private" "\
+Retrieve an item from private XML storage.
+The item to retrieve is identified by NODE-NAME (a symbol) and
+NAMESPACE (a string).
+
+On success, SUCCESS-CALLBACK is called with JC and the retrieved
+XML fragment.
+
+On error, ERROR-CALLBACK is called with JC and the entire IQ
+result.
+
+\(fn JC NODE-NAME NAMESPACE SUCCESS-CALLBACK ERROR-CALLBACK)" nil nil)
+
+(autoload 'jabber-private-set "jabber-private" "\
+Store FRAGMENT in private XML storage.
+SUCCESS-CALLBACK, SUCCESS-CLOSURE-DATA, ERROR-CALLBACK and
+ERROR-CLOSURE-DATA are used as in `jabber-send-iq'.
+
+\(fn JC FRAGMENT &optional SUCCESS-CALLBACK SUCCESS-CLOSURE-DATA ERROR-CALLBACK ERROR-CLOSURE-DATA)" nil nil)
+
+;;;***
+
+;;;### (autoloads (jabber-send-default-presence jabber-send-presence)
+;;;;;;  "../jabber-presence" "../jabber-presence.el" (20197 46469))
+;;; Generated autoloads from jabber-presence.el
+
+(autoload 'jabber-send-presence "jabber-presence" "\
+Set presence for all accounts.
+
+\(fn SHOW STATUS PRIORITY)" t nil)
+
+(autoload 'jabber-send-default-presence "jabber-presence" "\
+Send default presence.
+Default presence is specified by `jabber-default-show',
+`jabber-default-status', and `jabber-default-priority'.
+
+\(fn &optional IGNORE)" t nil)
+
+;;;***
+
+;;;### (autoloads (jabber-muc-private-message-p jabber-muc-sender-p
+;;;;;;  jabber-muc-message-p jabber-muc-vcard-get jabber-muc-private-get-buffer
+;;;;;;  jabber-muc-get-buffer jabber-muc-autojoin jabber-muc-default-nicknames)
+;;;;;;  "../jabber-muc" "../jabber-muc.el" (20197 46469))
+;;; Generated autoloads from jabber-muc.el
+
+(defvar *jabber-active-groupchats* nil "\
+alist of groupchats and nicknames
+Keys are strings, the bare JID of the room.
+Values are strings.")
+
+(defvar jabber-muc-default-nicknames nil "\
+Default nickname for specific MUC rooms.")
+
+(custom-autoload 'jabber-muc-default-nicknames "../jabber-muc" t)
+
+(defvar jabber-muc-autojoin nil "\
+List of MUC rooms to automatically join on connection.
+This list is saved in your Emacs customizations.  You can also store
+such a list on the Jabber server, where it is available to every
+client; see `jabber-edit-bookmarks'.")
+
+(custom-autoload 'jabber-muc-autojoin "../jabber-muc" t)
+
+(defvar jabber-muc-printers 'nil "\
+List of functions that may be able to print part of a MUC message.
+This gets prepended to `jabber-chat-printers', which see.")
+
+(autoload 'jabber-muc-get-buffer "jabber-muc" "\
+Return the chat buffer for chatroom GROUP.
+Either a string or a buffer is returned, so use `get-buffer' or
+`get-buffer-create'.
+
+\(fn GROUP)" nil nil)
+
+(autoload 'jabber-muc-private-get-buffer "jabber-muc" "\
+Return the chat buffer for private chat with NICKNAME in GROUP.
+Either a string or a buffer is returned, so use `get-buffer' or
+`get-buffer-create'.
+
+\(fn GROUP NICKNAME)" nil nil)
+
+(autoload 'jabber-muc-vcard-get "jabber-muc" "\
+Request vcard from chat with NICKNAME in GROUP.
+
+\(fn JC GROUP NICKNAME)" t nil)
+
+(autoload 'jabber-muc-message-p "jabber-muc" "\
+Return non-nil if MESSAGE is a groupchat message.
+That does not include private messages in a groupchat, but does
+include groupchat invites.
+
+\(fn MESSAGE)" nil nil)
+
+(autoload 'jabber-muc-sender-p "jabber-muc" "\
+Return non-nil if JID is a full JID of an MUC participant.
+
+\(fn JID)" nil nil)
+
+(autoload 'jabber-muc-private-message-p "jabber-muc" "\
+Return non-nil if MESSAGE is a private message in a groupchat.
+
+\(fn MESSAGE)" nil nil)
+
+;;;***
+
+;;;### (autoloads (jabber-muc-looks-like-personal-p) "jabber-muc-nick-completion"
+;;;;;;  "../jabber-muc-nick-completion.el" (20197 46469))
+;;; Generated autoloads from jabber-muc-nick-completion.el
+
+(autoload 'jabber-muc-looks-like-personal-p "jabber-muc-nick-completion" "\
+Return non-nil if jabber MESSAGE is addresed to me.
+Optional argument GROUP to look.
+
+\(fn MESSAGE &optional GROUP)" nil nil)
+
+;;;***
+
+;;;### (autoloads (jabber-display-menu) "jabber-menu" "jabber-menu.el"
+;;;;;;  (20197 46469))
+;;; Generated autoloads from jabber-menu.el
+
+(defvar jabber-menu (let ((map (make-sparse-keymap "jabber-menu"))) (define-key map [jabber-menu-connect] '("Connect" . jabber-connect-all)) (define-key map [jabber-menu-nextmsg] '("Next unread message" . jabber-activity-switch-to)) (define-key map [jabber-menu-disconnect] '("Disconnect" . jabber-disconnect)) (define-key map [jabber-menu-roster] '("Switch to roster" . jabber-switch-to-roster-buffer)) (define-key map [jabber-menu-customize] '("Customize" . jabber-customize)) (define-key map [jabber-menu-info] '("Help" . jabber-info)) (define-key map [jabber-menu-status] (cons "Set Status" (make-sparse-keymap "set-status"))) (define-key map [jabber-menu-status jabber-menu-status-chat] '("Chatty" lambda nil (interactive) (jabber-send-presence "chat" (jabber-read-with-input-method "status message: " *jabber-current-status* '*jabber-status-history*) *jabber-current-priority*))) (define-key map [jabber-menu-status jabber-menu-status-dnd] '("Do not Disturb" lambda nil (interactive) (jabber-send-presence "dnd" (jabber-read-with-input-method "status message: " *jabber-current-status* '*jabber-status-history*) *jabber-current-priority*))) (define-key map [jabber-menu-status jabber-menu-status-xa] '("Extended Away" . jabber-send-xa-presence)) (define-key map [jabber-menu-status jabber-menu-status-away] '("Away" . jabber-send-away-presence)) (define-key map [jabber-menu-status jabber-menu-status-online] '("Online" . jabber-send-default-presence)) map))
+
+(defvar jabber-display-menu 'maybe "\
+Decide whether the \"Jabber\" menu is displayed in the menu bar.
+If t, always display.
+If nil, never display.
+If maybe, display if any of `jabber-account-list' or `jabber-connections'
+is non-nil.")
+
+(custom-autoload 'jabber-display-menu "../jabber-menu" t)
+
+(define-key-after (lookup-key global-map [menu-bar]) [jabber-menu] (list 'menu-item "Jabber" jabber-menu :visible '(or (eq jabber-display-menu t) (and (eq jabber-display-menu 'maybe) (or jabber-account-list (bound-and-true-p jabber-connections))))))
+
+;;;***
+
+;;;### (autoloads nil "jabber-keymap" "jabber-keymap.el" (20197
+;;;;;;  46469))
+;;; Generated autoloads from jabber-keymap.el
+
+(defvar jabber-global-keymap (let ((map (make-sparse-keymap))) (define-key map "" 'jabber-connect-all) (define-key map "" 'jabber-disconnect) (define-key map "" 'jabber-switch-to-roster-buffer) (define-key map "\n" 'jabber-chat-with) (define-key map "\f" 'jabber-activity-switch-to) (define-key map "" 'jabber-send-away-presence) (define-key map "" 'jabber-send-default-presence) (define-key map "" 'jabber-send-xa-presence) (define-key map "" 'jabber-send-presence) map) "\
+Global Jabber keymap (usually under C-x C-j)")
+
+(define-key ctl-x-map "\n" jabber-global-keymap)
+
+;;;***
+
+;;;### (autoloads (jabber-whitespace-ping-start jabber-whitespace-ping-interval
+;;;;;;  jabber-keepalive-start jabber-keepalive-timeout jabber-keepalive-interval
+;;;;;;  jabber-keepalive) "../jabber-keepalive" "../jabber-keepalive.el"
+;;;;;;  (20197 46468))
+;;; Generated autoloads from jabber-keepalive.el
+
+(let ((loads (get 'jabber-keepalive 'custom-loads))) (if (member '"../jabber-keepalive" loads) nil (put 'jabber-keepalive 'custom-loads (cons '"../jabber-keepalive" loads))))
+
+(defvar jabber-keepalive-interval 600 "\
+Interval in seconds between connection checks.")
+
+(custom-autoload 'jabber-keepalive-interval "../jabber-keepalive" t)
+
+(defvar jabber-keepalive-timeout 20 "\
+Seconds to wait for response from server.")
+
+(custom-autoload 'jabber-keepalive-timeout "../jabber-keepalive" t)
+
+(autoload 'jabber-keepalive-start "jabber-keepalive" "\
+Activate keepalive.
+That is, regularly send a ping request to the server, and
+disconnect if it doesn't answer.  See `jabber-keepalive-interval'
+and `jabber-keepalive-timeout'.
+
+The JC argument makes it possible to add this function to
+`jabber-post-connect-hooks'; it is ignored.  Keepalive is activated
+for all accounts regardless of the argument.
+
+\(fn &optional JC)" t nil)
+
+(defvar jabber-whitespace-ping-interval 30 "\
+Send a space character to the server with this interval, in seconds.
+
+This is a traditional remedy for a number of problems: to keep NAT
+boxes from considering the connection dead, to have the OS discover
+earlier that the connection is lost, and to placate servers which rely
+on the client doing this, e.g. Openfire.
+
+If you want to verify that the server is able to answer, see
+`jabber-keepalive-start' for another mechanism.")
+
+(custom-autoload 'jabber-whitespace-ping-interval "../jabber-keepalive" t)
+
+(autoload 'jabber-whitespace-ping-start "jabber-keepalive" "\
+Start sending whitespace pings at regular intervals.
+See `jabber-whitespace-ping-interval'.
+
+The JC argument is ignored; whitespace pings are enabled for all
+accounts.
+
+\(fn &optional JC)" t nil)
+
+;;;***
+
+;;;### (autoloads (jabber-gmail-query jabber-gmail-subscribe) "jabber-gmail"
+;;;;;;  "../jabber-gmail.el" (20197 46468))
+;;; Generated autoloads from jabber-gmail.el
+
+(autoload 'jabber-gmail-subscribe "jabber-gmail" "\
+Subscribe to gmail notifications.
+See http://code.google.com/apis/talk/jep_extensions/usersettings.html#4
+
+\(fn JC)" t nil)
+
+(autoload 'jabber-gmail-query "jabber-gmail" "\
+Request mail information from the Google Talk server (a.k.a. one shot query).
+See http://code.google.com/apis/talk/jep_extensions/gmail.html#requestmail
+
+\(fn JC)" t nil)
+
+;;;***
+
+;;;### (autoloads (jabber-import-roster jabber-export-roster) "jabber-export"
+;;;;;;  "../jabber-export.el" (20197 46468))
+;;; Generated autoloads from jabber-export.el
+
+(autoload 'jabber-export-roster "jabber-export" "\
+Export roster for connection JC.
+
+\(fn JC)" t nil)
+
+(autoload 'jabber-import-roster "jabber-export" "\
+Create buffer for roster import for connection JC from FILE.
+
+\(fn JC FILE)" t nil)
+
+;;;***
+
+;;;### (autoloads nil "jabber-core" "jabber-core.el" (20197
+;;;;;;  46468))
+;;; Generated autoloads from jabber-core.el
+ (autoload 'jabber-connect-all "jabber" "Connect to all configured Jabber accounts.\nSee `jabber-account-list'.\nIf no accounts are configured (or ARG supplied), call `jabber-connect' interactively." t)
+ (autoload 'jabber-connect "jabber" "Connect to the Jabber server and start a Jabber XML stream.\nWith prefix argument, register a new account.\nWith double prefix argument, specify more connection details." t)
+
+;;;***
+
+;;;### (autoloads nil "jabber-console" "jabber-console.el"
+;;;;;;  (20197 46468))
+;;; Generated autoloads from jabber-console.el
+
+(defvar jabber-buffer-connection nil "\
+The connection used by this buffer.")
+
+(make-variable-buffer-local 'jabber-buffer-connection)
+
+;;;***
+
+;;;### (autoloads (jabber-compose) "jabber-compose" "jabber-compose.el"
+;;;;;;  (20197 46468))
+;;; Generated autoloads from jabber-compose.el
+
+(autoload 'jabber-compose "jabber-compose" "\
+Create a buffer for composing a Jabber message.
+
+\(fn JC &optional RECIPIENT)" t nil)
+
+;;;***
+
+;;;### (autoloads nil "jabber-chatbuffer" "jabber-chatbuffer.el"
+;;;;;;  (20197 46468))
+;;; Generated autoloads from jabber-chatbuffer.el
+
+(defvar jabber-buffer-connection nil "\
+The connection used by this buffer.")
+
+(make-variable-buffer-local 'jabber-buffer-connection)
+
+;;;***
+
+;;;### (autoloads (jabber-chat-get-buffer) "jabber-chat" "jabber-chat.el"
+;;;;;;  (20197 46468))
+;;; Generated autoloads from jabber-chat.el
+
+(defvar jabber-chatting-with nil "\
+JID of the person you are chatting with")
+
+(autoload 'jabber-chat-get-buffer "jabber-chat" "\
+Return the chat buffer for chatting with CHAT-WITH (bare or full JID).
+Either a string or a buffer is returned, so use `get-buffer' or
+`get-buffer-create'.
+
+\(fn CHAT-WITH)" nil nil)
+
+;;;***
+
+;;;### (autoloads (jabber-edit-bookmarks jabber-get-bookmarks-from-cache
+;;;;;;  jabber-get-bookmarks jabber-parse-conference-bookmark jabber-get-conference-data)
+;;;;;;  "../jabber-bookmarks" "../jabber-bookmarks.el" (20197 46468))
+;;; Generated autoloads from jabber-bookmarks.el
+
+(autoload 'jabber-get-conference-data "jabber-bookmarks" "\
+Get bookmark data for CONFERENCE-JID.
+KEY may be nil or one of :name, :autojoin, :nick and :password.
+If KEY is nil, a plist containing the above keys is returned.
+CONT is called when the result is available, with JC and the
+result as arguments.  If CONT is nil, return the requested data
+immediately, and return nil if it is not in the cache.
+
+\(fn JC CONFERENCE-JID CONT &optional KEY)" nil nil)
+
+(autoload 'jabber-parse-conference-bookmark "jabber-bookmarks" "\
+Convert a <conference/> tag into a plist.
+The plist may contain the keys :jid, :name, :autojoin,
+:nick and :password.
+
+\(fn NODE)" nil nil)
+
+(autoload 'jabber-get-bookmarks "jabber-bookmarks" "\
+Retrieve bookmarks (if needed) and call CONT.
+Arguments to CONT are JC and the bookmark list.  CONT will be
+called as the result of a filter function or a timer.
+If REFRESH is non-nil, always fetch bookmarks.
+
+\(fn JC CONT &optional REFRESH)" nil nil)
+
+(autoload 'jabber-get-bookmarks-from-cache "jabber-bookmarks" "\
+Return cached bookmarks for JC.
+If bookmarks have not yet been fetched by `jabber-get-bookmarks',
+return nil.
+
+\(fn JC)" nil nil)
+
+(autoload 'jabber-edit-bookmarks "jabber-bookmarks" "\
+Create a buffer for editing bookmarks interactively.
+
+\(fn JC)" t nil)
+
+;;;***
+
+;;;### (autoloads (jabber-autoaway-start) "jabber-autoaway" "jabber-autoaway.el"
+;;;;;;  (20197 46468))
+;;; Generated autoloads from jabber-autoaway.el
+
+(autoload 'jabber-autoaway-start "jabber-autoaway" "\
+Start autoaway timer.
+The IGNORED argument is there so you can put this function in
+`jabber-post-connect-hooks'.
+
+\(fn &optional IGNORED)" t nil)
+
+;;;***
+
+;;;### (autoloads (jabber-activity-mode) "jabber-activity" "jabber-activity.el"
+;;;;;;  (20197 46468))
+;;; Generated autoloads from jabber-activity.el
+
+(defvar jabber-activity-mode t "\
+Non-nil if Jabber-Activity mode is enabled.
+See the command `jabber-activity-mode' for a description of this minor mode.
+Setting this variable directly does not take effect;
+either customize it (see the info node `Easy Customization')
+or call the function `jabber-activity-mode'.")
+
+(custom-autoload 'jabber-activity-mode "../jabber-activity" nil)
+
+(autoload 'jabber-activity-mode "jabber-activity" "\
+Toggle display of activity in hidden jabber buffers in the mode line.
+
+With a numeric arg, enable this display if arg is positive.
+
+\(fn &optional ARG)" t nil)
+
+;;;***
