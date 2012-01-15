@@ -103,4 +103,4 @@
 (autoload 'hexrgb-red                           "hexrgb" "" t)
 (autoload 'hexrgb-green                         "hexrgb" "" t)
 (autoload 'hexrgb-blue                          "hexrgb" "" t)
-(provide 'emacs-jabber-epkg-install)
+(provide 'emacs-jabber-epackage-install)

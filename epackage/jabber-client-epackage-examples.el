@@ -1,5 +1,5 @@
 ;; Prevent loading this file
-(error "jabber-client-epkg-examples.el is not a config file.")
+(error "jabber-client-epackage-examples.el is not a config file.")
 
 ;; To start Jabber, use M-x jabber-chat-with
 

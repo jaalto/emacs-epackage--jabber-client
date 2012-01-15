@@ -501,4 +501,4 @@
 (autoload 'ncf-presence                         "nick-change-fail" "" nil)
 (autoload 'ncf-assert                           "nick-change-fail" "" nil)
 (autoload 'ncf-do                               "nick-change-fail" "" nil)
-(provide 'emacs-jabber-epkg-autoloads)
+(provide 'emacs-jabber-epackage-autoloads)
