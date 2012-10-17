@@ -1108,6 +1108,7 @@ interface and do other useful things.
 * Watch buddies::
 * Spell checking::
 * Gmail notifications::
+* Saving groups roll state::
 @end menu
 
 @node Autoaway, Modeline status, , Useful features
@@ -1356,7 +1357,7 @@ what you receive or what you have already sent.  You may want to add
 For more information about Emacs spell checking, @pxref{Spelling, ,
 Checking and Correcting Spelling, emacs, GNU Emacs Manual}.
 
-@node Gmail notifications, , Spell checking, Useful features
+@node Gmail notifications, Saving groups roll state, Spell checking, Useful features
 @section Gmail notifications
 
 @cindex Gmail notifications
@@ -1401,6 +1402,24 @@ See http://code.google.com/apis/talk/jep_extensions/gmail.html#response"
 			       (shell-quote-argument msg) opts))))
   (defalias 'osd 'message))
 @end example
+
+@node Saving groups roll state, , Gmail notifications, Useful features
+@section Saving groups roll state
+
+@cindex Saving groups roll state
+
+You can save roster's groups rollup/rolldown state between sessions.
+To do this you need to add @code{jabber-roster-save-groups} to
+@code{jabber-pre-disconnect-hook} and
+@code{jabber-roster-restore-groups} to
+@code{jabber-post-connect-hooks}, respectively.
+
+State saved in private storage on server-side (for each account). Note
+that state restoring working by rolling up groups, rolled up at state
+saving (by default, all groups rolled down). Also note that at now,
+@code{jabber-pre-disconnect-hook} run only with
+@code{jabber-disconnect} (not with @code{jabber-disconnect-one}).
+
 
 @node Message history, Typing notifications, Useful features, Top
 @chapter Message history
@@ -2026,6 +2045,10 @@ specific sound files for contacts matching a regexp in the variables
 The @code{screen} alerts send a message through the Screen terminal
 manager@footnote{See @uref{http://www.gnu.org/software/screen/}.}.  They do no
 harm if called when you don't use Screen.
+
+@cindex Tmux terminal manager
+The @code{tmux} alerts send a message through the tmux terminal
+manager@footnote{See @uref{http://tmux.sourceforge.net/}.}.
 
 @cindex Ratpoison window manager
 @cindex Window manager, Ratpoison
@@ -2820,8 +2843,8 @@ lists is not yet supported.
 @node XEP-0049, XEP-0050, XEP-0045, Protocol support
 @section XEP-0049 (Private XML Storage)
 
-jabber.el contains an implementation of XEP-0049; however it is not used
-for anything right now.
+jabber.el contains an implementation of XEP-0049; It is used
+for bookmarks and roster's groups roll state saving.
 
 @node XEP-0050, XEP-0054, XEP-0049, Protocol support
 @section XEP-0050 (Ad-Hoc Commands)

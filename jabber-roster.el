@@ -25,6 +25,8 @@
 (require 'jabber-alert)
 (require 'jabber-keymap)
 (require 'format-spec)
+(require 'cl)				;for `find'
+(require 'jabber-private)
 
 (defgroup jabber-roster nil "roster display options"
   :group 'jabber)
@@ -156,12 +158,12 @@ Trailing newlines are always removed, regardless of this variable."
   :type 'string
   :get '(lambda (var)
 	  (let ((val (symbol-value var)))
-	    (if (stringp val)
-		(set-text-properties 0 (length val) nil val)
-	      val)))
+	    (when (stringp val)
+	      (set-text-properties 0 (length val) nil val))
+	    val))
   :set '(lambda (var val)
-          (if (stringp val)
-              (set-text-properties 0 (length val) nil val))
+          (when (stringp val)
+	    (set-text-properties 0 (length val) nil val))
           (custom-set-default var val))
   )
 
@@ -254,11 +256,27 @@ chat-with-jid-at-point is no group at point"
 					 'jabber-jid)))
     (if (and group-at-point account-at-point)
 	(jabber-roster-roll-group account-at-point group-at-point)
-      (jabber-chat-with-jid-at-point)
-      (ignore-errors (jabber-muc-join
-                      account-at-point
-                      jid-at-point
-                      (jabber-muc-read-my-nickname account-at-point jid-at-point t) t)))))
+      ;; Is this a normal contact, or a groupchat?  Let's ask it.
+      (jabber-disco-get-info
+       account-at-point (jabber-jid-user jid-at-point) nil
+       #'jabber-roster-ret-action-at-point-1
+       jid-at-point))))
+
+(defun jabber-roster-ret-action-at-point-1 (jc jid result)
+  ;; If we get an error, assume it's a normal contact.
+  (if (eq (car result) 'error)
+      (jabber-chat-with jc jid)
+    ;; Otherwise, let's check whether it has a groupchat identity.
+    (let ((identities (car result)))
+      (if (find "conference" (if (sequencep identities) identities nil)
+		:key (lambda (i) (aref i 1))
+		:test #'string=)
+	  ;; Yes!  Let's join it.
+	  (jabber-muc-join jc jid
+			   (jabber-muc-read-my-nickname jc jid t)
+			   t)
+	;; No.  Let's open a normal chat buffer.
+	(jabber-chat-with jc jid)))))
 
 (defun jabber-roster-mouse-2-action-at-point (e)
   "Action for mouse-2. Before try to roll up/down group. Eval
@@ -312,21 +330,29 @@ Eval `jabber-roster-change' is no group at point"
 					      group-at-point))
       (call-interactively 'jabber-roster-change))))
 
-(defun jabber-roster-roll-group (jc group-name)
-  "Roll up/down group in roster"
+(defun jabber-roster-roll-group (jc group-name &optional set)
+  "Roll up/down group in roster.
+If optional SET is t, roll up group.
+If SET is nor t or nil, roll down group."
   (let* ((state-data (fsm-get-state-data jc))
-	 (roll-groups (plist-get state-data
-				 :roster-roll-groups)))
-    (plist-put
-     state-data :roster-roll-groups
-     (if (find group-name roll-groups
-	       :test 'string=)
-	 (remove-if-not (lambda (group-name-in-list)
-			  (not (string= group-name
-					group-name-in-list)))
-			roll-groups)
-       (append roll-groups (list group-name)))))
-  (jabber-display-roster))
+	 (roll-groups (plist-get state-data :roster-roll-groups))
+         (new-roll-groups (if (find group-name roll-groups :test 'string=)
+                              ;; group is rolled up, roll it down if needed
+                              (if (or (not set) (and set (not (eq set t))))
+                                  (remove-if-not (lambda (group-name-in-list)
+                                                   (not (string= group-name
+                                                                 group-name-in-list)))
+                                                 roll-groups)
+                                roll-groups)
+                            ;; group is rolled down, roll it up if needed
+                            (if (or (not set) (and set (eq set t)))
+                                (append roll-groups (list group-name))
+                              roll-groups))) )
+    (unless (equal roll-groups new-roll-groups)
+      (plist-put
+       state-data :roster-roll-groups
+       new-roll-groups)
+      (jabber-display-roster))))
 
 (defun jabber-roster-mode ()
   "Major mode for Jabber roster display.
@@ -831,6 +857,35 @@ If optional PREV is non-nil, return position of previous property appearence."
                               (jabber-next-property 'prev)) previous)))
     (if previous (goto-char previous)
       (goto-char (point-max)))))
+
+(defun jabber-roster-restore-groups (jc)
+  "Restore roster's groups rolling state from private storage"
+  (interactive (list (jabber-read-account)))
+  (jabber-private-get jc 'roster "emacs-jabber"
+                      'jabber-roster-restore-groups-1 'ignore))
+
+(defun jabber-roster-restore-groups-1 (jc xml-data)
+  "Parse roster groups and restore rolling state"
+  (when (string= (jabber-xml-get-xmlns xml-data) "emacs-jabber")
+    (let* ((data (car (last xml-data)))
+           (groups (if (stringp data) (split-string data "\n") nil)))
+      (dolist (group groups)
+        (jabber-roster-roll-group jc group t)))))
+
+(defun jabber-roster-save-groups ()
+  "Save roster's groups rolling state in private storage"
+  (interactive)
+  (dolist (jc jabber-connections)
+    (let* ((groups (plist-get (fsm-get-state-data jc) :roster-roll-groups))
+           (roll-groups
+            (if groups
+                (mapconcat (lambda (a) (substring-no-properties a)) groups "\n")
+              "")))
+      (jabber-private-set jc
+                          `(roster ((xmlns . "emacs-jabber"))
+                                   ,roll-groups)
+                          'jabber-report-success "Roster groups saved"
+                          'jabber-report-success "Failed to save roster groups"))))
 
 (provide 'jabber-roster)
 
