@@ -1,7 +1,7 @@
 Package: emacs-jabber
 Section: extensions
 License: GPL-2+
-Depends: emacs (>= 23)
+Depends: emacs (>= 23), lib-hexrgb
 Status: stable unsafe
 Compat:
 Maintainer:
