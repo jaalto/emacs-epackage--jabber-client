@@ -1,6 +1,6 @@
 ;;; jabber-muc-nick-coloring.el --- Add nick coloring abilyty to emacs-jabber
 
-;; Copyright 2009, 2010, 2012 Terechkov Evgenii - evg@altlinux.org
+;; Copyright 2009, 2010, 2012, 2013 Terechkov Evgenii - evg@altlinux.org
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -20,8 +20,19 @@
 
 ;;; Code:
 
-(require 'hexrgb)                       ;we need hexrgb-hsv-to-hex
-(require 'assoc)                        ;we need aget/aput
+(eval-when-compile (require 'cl))	;for ignore-errors
+;; we need hexrgb-hsv-to-hex:
+(eval-and-compile
+  (or (ignore-errors (require 'hexrgb))
+      ;; jabber-fallback-lib/ from jabber/lisp/jabber-fallback-lib
+      (ignore-errors
+        (let ((load-path (cons (expand-file-name
+                                "jabber-fallback-lib"
+                                (file-name-directory (locate-library "jabber")))
+                               load-path)))
+          (require 'hexrgb)))
+      (error
+       "hexrgb not found in `load-path' or jabber-fallback-lib/ directory.")))
 
 ;;;;##########################################################################
 ;;;;  User Options, Variables
@@ -61,13 +72,13 @@
 
 (defun jabber-muc-nick-get-color (nick)
   "Get NICKs color"
-  (let ((color (aget jabber-muc-participant-colors nick)))
+  (let ((color (cdr (assoc nick jabber-muc-participant-colors))))
     (if color
         color
       (progn
         (unless jabber-muc-participant-colors )
-        (aput 'jabber-muc-participant-colors nick (jabber-muc-nick-gen-color nick))
-        (aget jabber-muc-participant-colors nick)))))
+        (push (cons nick (jabber-muc-nick-gen-color nick)) jabber-muc-participant-colors)
+        (cdr (assoc nick jabber-muc-participant-colors))))))
 
 (provide 'jabber-muc-nick-coloring)
 
